@@ -24,4 +24,8 @@ export class AuthProxy extends BaseProxy {
   async verifyAdmin(credentialUser: any) {
     return this.sendPost('/auth/admin/login', credentialUser);
   }
+
+  async autorize() {
+    return this.sendGet('/auth/admin/login');
+  }
 }

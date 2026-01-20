@@ -1,7 +1,7 @@
 // src/common/proxies/base.proxy.ts
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { InternalSecurityService } from 'src/security/internal-security.service';
+import { InternalSecurityService } from 'src/common/security/internal-security.service';
 import { lastValueFrom } from 'rxjs';
 import { InternalServerErrorException, Logger } from '@nestjs/common';
 
@@ -24,9 +24,11 @@ export abstract class BaseProxy {
 
   // Método genérico para hacer peticiones POST firmadas
   protected async sendPost(endpoint: string, data: any) {
-    const headers = await this.securityService.getSecurityHeaders(
+    // En la línea 27 (y similares como la 48):
+    const { headers, payload: securePayload } = await this.securityService.getSecurityHeaders(
       this.serviceName,
-      this.privateKeyVar
+      this.privateKeyVar,
+      data
     );
 
     const fullUrl = `${this.baseUrl}${endpoint}`;
@@ -45,7 +47,11 @@ export abstract class BaseProxy {
 
   // Método genérico para hacer peticiones GET firmadas
   protected async sendGet(endpoint: string) {
-    const headers = await this.securityService.getSecurityHeaders(this.serviceName, this.privateKeyVar);
+    const { headers } = await this.securityService.getSecurityHeaders(
+      this.serviceName,
+      this.privateKeyVar,
+      {}
+    );
     const fullUrl = `${this.baseUrl}${endpoint}`;
 
     try {

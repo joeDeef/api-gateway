@@ -1,12 +1,20 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { AuthProxy } from '../../proxies/auth.proxy';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, UseInterceptors } from '@nestjs/common';
+import { AuthProxy } from '../../common/proxies/auth.proxy';
 import { ValidateIdentityDto, ValidateOtpDto, ValidateBiometricDto, ValidateAdminDto } from './dto/main';
+import { SecurityHeadersGuard } from 'src/common/guards/security-headers.guard';
+import { DecryptionInterceptor } from 'src/common/interceptors/decryption.interceptor';
+import { AuthOrchestratorService } from './auth-orchestrator.service';
 
 @Controller('auth')
+@UseGuards(SecurityHeadersGuard)
+@UseInterceptors(DecryptionInterceptor)
 export class AuthController {
-  constructor(private readonly authProxy: AuthProxy) {}
+  constructor(
+    private readonly authProxy: AuthProxy,
+    private readonly authOrchestrator: AuthOrchestratorService) {}
 
-  // Verificación de Identidad (Cédula)
+    
+  // Verificación de Identidad (Cédula, Código Dactilar)
   @Post('identity')
   @HttpCode(HttpStatus.OK)
   async verifyIdentity(@Body() data: ValidateIdentityDto) {
@@ -17,7 +25,7 @@ export class AuthController {
   @Post('otp')
   @HttpCode(HttpStatus.OK)
   async verifyOtp(@Body() data: ValidateOtpDto) {
-    return await this.authProxy.verifyOtp(data);
+    return await this.authOrchestrator.completeOtpVerification(data);
   }
 
   // Valicación Biométrica
@@ -32,5 +40,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async verifyAdmin(@Body() data: ValidateAdminDto) {
     return await this.authProxy.verifyAdmin(data);
+  }
+
+  // Validación Credenciales Administrador
+  @Post('admin/autorizate')
+  @HttpCode(HttpStatus.OK)
+  async autorizateAction() {
+    return await this.authProxy.autorize();
   }
 }

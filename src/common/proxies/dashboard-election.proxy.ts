@@ -5,7 +5,7 @@ import { BaseProxy } from './base.proxy';
 export class DashboardElectionProxy extends BaseProxy {
   protected readonly logger = new Logger(DashboardElectionProxy.name);
   protected readonly serviceName = 'dashboard-service';
-  protected readonly privateKeyVar = 'DASHBOARD_PRIVATE_KEY'; // Usa la llave del .txt
+  protected readonly privateKeyVar = 'DASHBOARD_PRIVATE_KEY';
   protected readonly urlVar = 'DASHBOARD_SERVICE_URL';
 
   async getResults() {

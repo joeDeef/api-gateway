@@ -1,7 +1,9 @@
-import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
-import { DashboardElectionProxy } from '../../proxies/dashboard-election.proxy';
+import { Controller, Get, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { DashboardElectionProxy } from '../../common/proxies/dashboard-election.proxy';
+import { SecurityHeadersGuard } from 'src/common/guards/security-headers.guard';
 
 @Controller('results')
+@UseGuards(SecurityHeadersGuard)
 export class DashboardElectionController {
   constructor(private readonly dashboardElectionProxy: DashboardElectionProxy) {}
 

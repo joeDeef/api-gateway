@@ -1,11 +1,19 @@
 import { Module } from '@nestjs/common';
 import { DashboardElectionController } from './dashboard-election.controller';
-import { DashboardElectionProxy } from '../../proxies/dashboard-election.proxy';
+import { DashboardElectionProxy } from '../../common/proxies/dashboard-election.proxy';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
+import { SecurityHeadersGuard } from 'src/common/guards/security-headers.guard';
 
 @Module({
-  imports: [],
+  imports: [
+    JwtModule.register({}),
+    ConfigModule,
+  ],
   controllers: [DashboardElectionController],
-  providers: [DashboardElectionProxy],
+  providers: [
+    DashboardElectionProxy, 
+    SecurityHeadersGuard],
   exports: [DashboardElectionProxy],
 })
-export class DashboardElectionModule {}
+export class DashboardElectionModule { }
