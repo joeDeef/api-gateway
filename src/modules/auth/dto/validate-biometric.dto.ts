@@ -9,6 +9,5 @@ export class ValidateBiometricDto {
   cedula: string;
 
   @IsNotEmpty({ message: 'Se necesito una imagen' })
-  @Length(6, 6)
   image: string;
 }

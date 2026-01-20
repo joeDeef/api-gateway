@@ -38,7 +38,7 @@ export class AuthOrchestratorService {
         const payload = this.jwtService.decode(authResponse.accessToken) as any;
         
         const sessionData = {
-          userId: payload.sub, // el usuarioID
+          userId: payload.sub, // Cedula del usuario
           role: payload.role,
           expirationTime: payload.exp // Tiempo de expiración del JWT
         };

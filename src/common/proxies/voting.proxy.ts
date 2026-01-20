@@ -20,14 +20,18 @@ export class VotingProxy extends BaseProxy {
     super(securityService, httpService, configService);
   }
 
-  async getCandidatos() {
-    return this.sendGet('/candidates/all');
-  }
-
   async setVoterSession(data: { userId: string; expirationTime: number }) {
     return this.sendPost('/voting/setTime', data);
   }
 
+  async castVote(data: { userId: string; candidateId: string; electionId: string }) {
+    return this.sendPost('/cast', data);
+  }
+
+  async confirmVote(data: { userId: string; electionId: string }) {
+    return this.sendPost('/confirm', data);
+  } 
+  
   async test() {
     return this.sendGet('/test');
   }

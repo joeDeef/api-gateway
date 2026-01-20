@@ -9,10 +9,16 @@ import { DoubleVotingGuard } from 'src/common/guards/double-voting.guard';
 export class VotingController {
   constructor(private readonly votingProxy: VotingProxy) { }
 
+  @Post('cast')
+  @UseGuards(DoubleVotingGuard)
+  async castVote(@Body() data: { userId: string; candidateId: string; electionId: string }) {
+    return this.votingProxy.castVote(data);
+  }
+
   @Post('confirm')
   @UseGuards(DoubleVotingGuard)
-  async confirmVote(@Body() data: any) {
-    //return this.votingProxy.finalizeVote(data);
+  async confirmVote(@Body() data: { userId: string; electionId: string }) {
+    return this.votingProxy.confirmVote(data);
   }
 
   @Get('test')
