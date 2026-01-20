@@ -20,15 +20,24 @@ async function bootstrap() {
 
   // Habilitar CORS - Permitir frontend local y producción
   app.enableCors({
-    origin: [
-      'http://localhost:4200',
-      'https://voto-seguro.vercel.app',
-      'https://voto-seguro-git-main-issacs-projects-609efade.vercel.app',
-      /\.vercel\.app$/  // Cualquier subdominio de Vercel
-    ],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        'http://localhost:4200',
+        'https://voto-seguro.vercel.app',
+        'https://voto-seguro-nine.vercel.app',
+        'https://voto-seguro-git-main-issacs-projects-609efade.vercel.app',
+      ];
+      // Permitir requests sin origin (Postman, curl, etc) o cualquier vercel.app
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        console.log('CORS blocked origin:', origin);
+        callback(null, false);
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   });
 
   await app.listen(port);
