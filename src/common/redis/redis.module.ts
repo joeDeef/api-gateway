@@ -7,13 +7,25 @@ import Redis from 'ioredis';
     {
       provide: 'REDIS_CLIENT',
       useFactory: () => {
-        return new Redis({
-          host: process.env.REDIS_HOST || 'localhost',
-          port: Number(process.env.REDIS_PORT) || 6379,
+        // En Railway usamos REDIS_URL o REDISURL
+        const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+
+        const client = new Redis(redisUrl, {
+          maxRetriesPerRequest: null,
         });
+
+        client.on('error', (err) => {
+          console.error('Error conectando a Redis en Railway:', err);
+        });
+
+        client.on('connect', () => {
+          console.log('✅ Conectado a Redis exitosamente');
+        });
+
+        return client;
       },
     },
   ],
   exports: ['REDIS_CLIENT'],
 })
-export class RedisModule {}
+export class RedisModule { }
