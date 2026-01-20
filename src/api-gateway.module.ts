@@ -10,6 +10,7 @@ import { InternalSecurityService } from './common/security/internal-security.ser
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { AuthOrchestratorService } from './modules/auth/auth-orchestrator.service';
 import { HttpModule } from '@nestjs/axios';
+import { RedisModule } from './common/redis/redis.module';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { HttpModule } from '@nestjs/axios';
       ttl: 60000, // Tiempo de observación (1 minuto)
       limit: 20,   // Máximo de peticiones permitidas por minuto por IP
     }]),
-
+    RedisModule,
     AuthModule,
     DashboardElectionModule,
     VotingnModule,

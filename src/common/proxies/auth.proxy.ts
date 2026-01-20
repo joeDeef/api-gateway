@@ -2,6 +2,10 @@ import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { BaseMessageProxy } from 'src/common/proxies/base-message.proxy';
 import { InternalSecurityService } from 'src/common/security/internal-security.service';
+import { ValidateAdminDto } from 'src/modules/auth/dto/validate-admin.dto';
+import { ValidateBiometricDto } from 'src/modules/auth/dto/validate-biometric.dto';
+import { ValidateIdentityDto } from 'src/modules/auth/dto/validate-identity.dto';
+import { ValidateOtpDto } from 'src/modules/auth/dto/validate-otp.dto';
 
 @Injectable()
 export class AuthProxy extends BaseMessageProxy {
@@ -17,20 +21,29 @@ export class AuthProxy extends BaseMessageProxy {
     super(authClient, securityService);
   }
 
-  async verifyIdentity(credentialUser: any) {
+  // 1. Iniciar el flujo
+  async verifyIdentity(credentialUser: ValidateIdentityDto) {
     return this.sendRequest('auth.validate-credentials', credentialUser);
   }
 
-  async verifyOtp(credentialUser: any) {
-    return this.sendRequest('auth.verify-otp', credentialUser);
+  // 2. Solicitar el envío del código (después de validar identidad)
+  async requestOtp(cedula: string) {
+    return this.sendRequest('auth.send-otp', { cedula });
   }
 
-  async verifyBiometric(credentialUser: any) {
-    return this.sendRequest('auth.biometric', credentialUser);
+  // 3. Validar el código que el usuario recibió en el correo
+  async verifyOtp(data: ValidateOtpDto) {
+    return this.sendRequest('auth.verify-otp', data);
   }
 
-  async verifyAdmin(credentialUser: any) {
-    return this.sendRequest('auth.admin-login', credentialUser);
+  // 4. Paso final: Verificación de rostro
+  async verifyBiometric(data: ValidateBiometricDto) {
+    return this.sendRequest('auth.biometric', data);
+  }
+
+  // 5. Acceso administrativo
+  async verifyAdmin(data: ValidateAdminDto) {
+    return this.sendRequest('auth.admin-login', data);
   }
 
   async autorize() {

@@ -10,6 +10,11 @@ export class DecryptionInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
 
+    // Si es GET o no tiene el header, saltar el descifrado
+    if (request.method === 'GET' || request.headers['x-encrypted'] !== 'true') {
+      return next.handle();
+    }
+
     // Validamos que el body contenga el campo 'payload'
     if (request.body && request.body.payload) {
       try {

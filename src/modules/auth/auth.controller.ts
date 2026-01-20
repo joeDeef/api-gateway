@@ -1,13 +1,17 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, UseInterceptors, Logger } from '@nestjs/common';
 import { AuthProxy } from '../../common/proxies/auth.proxy';
 import { ValidateIdentityDto, ValidateOtpDto, ValidateBiometricDto, ValidateAdminDto } from './dto/main';
 import { SecurityHeadersGuard } from 'src/common/guards/security-headers.guard';
 import { DecryptionInterceptor } from 'src/common/interceptors/decryption.interceptor';
 import { AuthOrchestratorService, AuthResponse } from './auth-orchestrator.service';
+import { DoubleVotingGuard } from 'src/common/guards/double-voting.guard';
 
 @Controller('auth')
+@UseGuards(DoubleVotingGuard)
 @UseInterceptors(DecryptionInterceptor)
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private readonly authProxy: AuthProxy,
     private readonly authOrchestrator: AuthOrchestratorService) { }
@@ -16,26 +20,32 @@ export class AuthController {
   @Post('identity')
   @HttpCode(HttpStatus.OK)
   async verifyIdentity(@Body() data: ValidateIdentityDto) {
+    this.logger.log(`Paso 1: Verificando identidad para cédula: ${data.cedula}`);
     return await this.authProxy.verifyIdentity(data);
   }
 
-  // Validacion de OTP
+  @Post('request-otp')
+  @HttpCode(HttpStatus.OK)
+  async requestOtp(@Body() data: { cedula: string }) {
+    this.logger.log(`Solicitando envío de OTP al microservicio para la cédula: ${data.cedula}`);
+    return await this.authProxy.requestOtp(data.cedula);
+  }
+
   @Post('otp')
-  async verifyOtp(@Body() data: ValidateOtpDto): Promise<AuthResponse> {
-    return await this.authOrchestrator.completeOtpVerification(data);
+  @HttpCode(HttpStatus.OK)
+  async verifyOtp(@Body() data: ValidateOtpDto) {
+    this.logger.log(`Paso 2: Verificando OTP para cédula: ${data.cedula}`);
+    return await this.authProxy.verifyOtp(data);
   }
 
   // Valicación Biométrica
   @Post('biometrics')
-  @UseGuards(SecurityHeadersGuard)
-  @HttpCode(HttpStatus.OK)
-  async verifyBiometric(@Body() data: ValidateBiometricDto) {
-    return await this.authProxy.verifyBiometric(data);
+  async verifyBiometric(@Body() data: ValidateBiometricDto): Promise<AuthResponse> {
+    return await this.authOrchestrator.completeBiometricVerification(data);
   }
 
   // Validación Credenciales Administrador
   @Post('admin/login')
-  @HttpCode(HttpStatus.OK)
   async verifyAdmin(@Body() data: ValidateAdminDto) {
     return await this.authProxy.verifyAdmin(data);
   }
@@ -43,7 +53,6 @@ export class AuthController {
   // Validación Credenciales Administrador
   @Post('admin/autorizate')
   @UseGuards(SecurityHeadersGuard)
-  @HttpCode(HttpStatus.OK)
   async autorizateAction() {
     return await this.authProxy.autorize();
   }

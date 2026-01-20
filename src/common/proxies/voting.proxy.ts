@@ -10,9 +10,7 @@ export class VotingProxy extends BaseProxy {
   protected readonly serviceName = 'voting-service';
   protected readonly privateKeyVar = 'VOTING_PRIVATE_KEY_BASE64';
   protected readonly urlVar = 'VOTING_SERVICE_URL';
-  
-  // DEBE LLAMARSE EXACTAMENTE apiKeyVar para que BaseProxy lo reconozca
-  protected readonly apiKeyVar = 'VOTING_INTERNAL_API_KEY'; 
+  protected readonly apiKeyVar = 'VOTING_INTERNAL_API_KEY';
 
   constructor(
     protected readonly securityService: InternalSecurityService,
