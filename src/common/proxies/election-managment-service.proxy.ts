@@ -8,10 +8,10 @@ import { ConfigService } from '@nestjs/config';
 export class ElectionManagmentProxy extends BaseProxy {
   protected readonly logger = new Logger(ElectionManagmentProxy.name);
   protected readonly serviceName = 'election-mgmt-service';
-  protected readonly privateKeyVar = 'ELECTION_MGMT_PRIVATE_KEY'; // O la que definas en el .env
+  protected readonly privateKeyVar = 'ELECTION_MGMT_PRIVATE_KEY';
   protected readonly urlVar = 'ELECTION_MGMT_URL';
-  protected readonly apiKeyVar = 'DASH_ELECT_INTERNAL_API_KEY';
-
+  protected readonly apiKeyVar = 'ELECTION_MNGT_INTERNAL_API_KEY';
+  protected readonly urlElectionMgmtService = "/api/v1/election"
 constructor(
     protected readonly securityService: InternalSecurityService,
     protected readonly httpService: HttpService,
@@ -19,10 +19,16 @@ constructor(
   ) {
     super(securityService, httpService, configService);
   }
-
-  async getResults() {
-    this.logger.log('--- [GATEWAY] Solicitando Resultados Reales ---');
+    async test() {
+    this.logger.log('Probando conexión con Election Management Service');
     // Usamos el método GET para obtener datos
-    return this.sendGet('/results/summary');
+    return this.sendGet(`${this.urlElectionMgmtService}/test`);  
+    }
+
+
+    async getCandidatos() {
+    this.logger.log('Solicitando Candidatos a Election Management Service');
+    // Usamos el método GET para obtener datos
+    return this.sendGet(`${this.urlElectionMgmtService}/candidates/today`);
   }
 }

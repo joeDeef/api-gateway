@@ -9,7 +9,7 @@ export abstract class BaseProxy {
   protected abstract readonly logger: Logger;
   protected abstract readonly serviceName: string;
   protected abstract readonly privateKeyVar: string;
-  protected abstract readonly apiKeyVar: string; // <-- AGREGAR ESTO
+  protected abstract readonly apiKeyVar: string;
   protected abstract readonly urlVar: string;
 
   constructor(
@@ -27,8 +27,8 @@ export abstract class BaseProxy {
     const { headers, payload: securePayload } = await this.securityService.getSecurityHeaders(
       this.serviceName,
       this.privateKeyVar,
-      this.apiKeyVar, // <-- 3er parámetro: Variable de la API KEY
-      data           // <-- 4to parámetro: Body
+      this.apiKeyVar,
+      data 
     );
 
     const fullUrl = `${this.baseUrl}${endpoint}`;
@@ -51,8 +51,8 @@ export abstract class BaseProxy {
     const { headers } = await this.securityService.getSecurityHeaders(
       this.serviceName,
       this.privateKeyVar,
-      this.apiKeyVar, // <-- 3er parámetro
-      {}             // <-- 4to parámetro: Body vacío para GET
+      this.apiKeyVar,
+      {} 
     );
     
     const fullUrl = `${this.baseUrl}${endpoint}`;

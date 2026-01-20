@@ -4,13 +4,13 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
-import { DashboardElectionModule } from './modules/dashboard-election/dashboard-election.module';
 import { VotingnModule } from './modules/voting/voting.module';
 import { InternalSecurityService } from './common/security/internal-security.service';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { AuthOrchestratorService } from './modules/auth/auth-orchestrator.service';
 import { HttpModule } from '@nestjs/axios';
 import { RedisModule } from './common/redis/redis.module';
+import { ElectionManagmentModule } from './modules/election-managment-service/election-managment.module';
 
 @Module({
   imports: [
@@ -21,8 +21,8 @@ import { RedisModule } from './common/redis/redis.module';
     }]),
     RedisModule,
     AuthModule,
-    DashboardElectionModule,
     VotingnModule,
+    ElectionManagmentModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
