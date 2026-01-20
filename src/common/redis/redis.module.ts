@@ -19,7 +19,7 @@ import Redis from 'ioredis';
         });
 
         client.on('connect', () => {
-          console.log('✅ Conectado a Redis exitosamente');
+          console.log('Conectado a Redis exitosamente');
         });
 
         return client;

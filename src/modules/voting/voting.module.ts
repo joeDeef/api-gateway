@@ -7,19 +7,21 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { SecurityHeadersGuard } from 'src/common/guards/security-headers.guard';
 import { InternalSecurityModule } from 'src/common/security/internal-security.module';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Module({
   imports: [HttpModule, // Necesario para las peticiones HTTP
       JwtModule.register({}),
       ConfigModule,
-      InternalSecurityModule
+      InternalSecurityModule,
   ],
   controllers: [VotingController],
   providers: [
     VotingProxy,
     InternalSecurityService, // <--- Agrégalo aquí
     JwtService, // <--- También es necesario porque el servicio lo usa
-    SecurityHeadersGuard
+    SecurityHeadersGuard,
+    JwtAuthGuard
   ],
   exports: [VotingProxy],
 })

@@ -20,27 +20,28 @@ export class AuthController {
   @Post('identity')
   @HttpCode(HttpStatus.OK)
   async verifyIdentity(@Body() data: ValidateIdentityDto) {
-    this.logger.log(`Paso 1: Verificando identidad para cédula: ${data.cedula}`);
+    this.logger.log('Paso 1: Verificando identidad');
     return await this.authProxy.verifyIdentity(data);
   }
 
   @Post('request-otp')
   @HttpCode(HttpStatus.OK)
   async requestOtp(@Body() data: { cedula: string }) {
-    this.logger.log(`Solicitando envío de OTP al microservicio para la cédula: ${data.cedula}`);
+    this.logger.log(`Solicitando envío de OTP al microservicio`);
     return await this.authProxy.requestOtp(data.cedula);
   }
 
   @Post('otp')
   @HttpCode(HttpStatus.OK)
   async verifyOtp(@Body() data: ValidateOtpDto) {
-    this.logger.log(`Paso 2: Verificando OTP para cédula: ${data.cedula}`);
+    this.logger.log(`Paso 2: Verificando OTP`);
     return await this.authProxy.verifyOtp(data);
   }
 
   // Valicación Biométrica
   @Post('biometrics')
   async verifyBiometric(@Body() data: ValidateBiometricDto): Promise<AuthResponse> {
+    this.logger.log(`Paso 3: Verificando Biometría`);
     return await this.authOrchestrator.completeBiometricVerification(data);
   }
 
