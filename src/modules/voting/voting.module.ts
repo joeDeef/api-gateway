@@ -6,11 +6,13 @@ import { InternalSecurityService } from 'src/common/security/internal-security.s
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { SecurityHeadersGuard } from 'src/common/guards/security-headers.guard';
+import { InternalSecurityModule } from 'src/common/security/internal-security.module';
 
 @Module({
   imports: [HttpModule, // Necesario para las peticiones HTTP
       JwtModule.register({}),
       ConfigModule,
+      InternalSecurityModule
   ],
   controllers: [VotingController],
   providers: [

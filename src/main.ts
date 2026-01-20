@@ -12,6 +12,13 @@ async function bootstrap() {
   }));
 
   const port = process.env.PORT ?? 3000;
+
+  //Habilitar CORS
+  app.enableCors({
+    origin: 'http://localhost:4200', // URL de tu frontend de Angular
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
   await app.listen(port);
   console.log(`API Gateway listening on port ${port}`);
 }

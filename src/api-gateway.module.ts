@@ -9,6 +9,7 @@ import { VotingnModule } from './modules/voting/voting.module';
 import { InternalSecurityService } from './common/security/internal-security.service';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { AuthOrchestratorService } from './modules/auth/auth-orchestrator.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -25,6 +26,9 @@ import { AuthOrchestratorService } from './modules/auth/auth-orchestrator.servic
       isGlobal: true,
     }),
     JwtModule.register({}),
+    HttpModule.register({
+      global: true, // <--- Esto lo hace disponible en TODA la app
+    }),
   ],
   providers: [
     InternalSecurityService,

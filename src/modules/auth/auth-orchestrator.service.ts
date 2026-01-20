@@ -4,6 +4,13 @@ import { AuthProxy } from "src/common/proxies/auth.proxy";
 import { VotingProxy } from "src/common/proxies/voting.proxy";
 import { ValidateOtpDto } from "./dto/validate-otp.dto";
 
+// 1. Definimos la interfaz de respuesta
+export interface AuthResponse {
+  accessToken?: string;
+  user?: any;
+  status?: string;
+}
+
 @Injectable()
 export class AuthOrchestratorService {
   private readonly logger = new Logger(AuthOrchestratorService.name);
@@ -15,26 +22,23 @@ export class AuthOrchestratorService {
   ) {}
 
   async completeOtpVerification(data: ValidateOtpDto) {
-    // 1. Llamar al microservicio de Auth a través del proxy
-    const authResponse = await this.authProxy.verifyOtp(data);
+    // 2. Casteamos la respuesta con 'as AuthResponse'
+    const authResponse = await this.authProxy.verifyOtp(data) as AuthResponse;
 
-    // 2. Si el OTP es válido y recibimos el token de acceso
     if (authResponse?.accessToken) {
       try {
-        const payload: any = this.jwtService.decode(authResponse.accessToken);
+        // decode() puede devolver string o objeto, por eso usamos <any>
+        const payload = this.jwtService.decode(authResponse.accessToken) as any;
         
         const sessionData = {
           userId: payload.sub,
           expirationTime: payload.exp
         };
 
-        // 3. Delegamos la notificación al VotingProxy
-        // No necesitamos manejar los headers aquí, el Proxy lo hace internamente
         await this.votingProxy.setVoterSession(sessionData);
 
         this.logger.log(`Sincronización de sesión exitosa para el usuario: ${payload.sub}`);
       } catch (err) {
-        // Logueamos el error pero no bloqueamos el login del usuario
         this.logger.error(`Error en la sincronización proactiva: ${err.message}`);
       }
     }

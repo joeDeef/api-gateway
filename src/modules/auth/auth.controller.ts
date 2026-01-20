@@ -3,17 +3,15 @@ import { AuthProxy } from '../../common/proxies/auth.proxy';
 import { ValidateIdentityDto, ValidateOtpDto, ValidateBiometricDto, ValidateAdminDto } from './dto/main';
 import { SecurityHeadersGuard } from 'src/common/guards/security-headers.guard';
 import { DecryptionInterceptor } from 'src/common/interceptors/decryption.interceptor';
-import { AuthOrchestratorService } from './auth-orchestrator.service';
+import { AuthOrchestratorService, AuthResponse } from './auth-orchestrator.service';
 
 @Controller('auth')
-@UseGuards(SecurityHeadersGuard)
 @UseInterceptors(DecryptionInterceptor)
 export class AuthController {
   constructor(
     private readonly authProxy: AuthProxy,
-    private readonly authOrchestrator: AuthOrchestratorService) {}
+    private readonly authOrchestrator: AuthOrchestratorService) { }
 
-    
   // Verificación de Identidad (Cédula, Código Dactilar)
   @Post('identity')
   @HttpCode(HttpStatus.OK)
@@ -23,13 +21,13 @@ export class AuthController {
 
   // Validacion de OTP
   @Post('otp')
-  @HttpCode(HttpStatus.OK)
-  async verifyOtp(@Body() data: ValidateOtpDto) {
+  async verifyOtp(@Body() data: ValidateOtpDto): Promise<AuthResponse> {
     return await this.authOrchestrator.completeOtpVerification(data);
   }
 
   // Valicación Biométrica
   @Post('biometrics')
+  @UseGuards(SecurityHeadersGuard)
   @HttpCode(HttpStatus.OK)
   async verifyBiometric(@Body() data: ValidateBiometricDto) {
     return await this.authProxy.verifyBiometric(data);
@@ -44,6 +42,7 @@ export class AuthController {
 
   // Validación Credenciales Administrador
   @Post('admin/autorizate')
+  @UseGuards(SecurityHeadersGuard)
   @HttpCode(HttpStatus.OK)
   async autorizateAction() {
     return await this.authProxy.autorize();

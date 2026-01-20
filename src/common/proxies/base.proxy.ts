@@ -9,6 +9,7 @@ export abstract class BaseProxy {
   protected abstract readonly logger: Logger;
   protected abstract readonly serviceName: string;
   protected abstract readonly privateKeyVar: string;
+  protected abstract readonly apiKeyVar: string; // <-- AGREGAR ESTO
   protected abstract readonly urlVar: string;
 
   constructor(
@@ -17,26 +18,26 @@ export abstract class BaseProxy {
     protected readonly configService: ConfigService,
   ) { }
 
-  // "Variable Global" de URL para el servicio específico
   protected get baseUrl() {
     return this.configService.get<string>(this.urlVar);
   }
 
-  // Método genérico para hacer peticiones POST firmadas
   protected async sendPost(endpoint: string, data: any) {
-    // En la línea 27 (y similares como la 48):
+    // LLAMADA CORREGIDA (4 parámetros):
     const { headers, payload: securePayload } = await this.securityService.getSecurityHeaders(
       this.serviceName,
       this.privateKeyVar,
-      data
+      this.apiKeyVar, // <-- 3er parámetro: Variable de la API KEY
+      data           // <-- 4to parámetro: Body
     );
 
     const fullUrl = `${this.baseUrl}${endpoint}`;
     this.logger.log(`Conectando con: ${fullUrl}`);
 
     try {
+      // Importante: Enviamos el securePayload si el servicio espera el cuerpo cifrado
       const response = await lastValueFrom(
-        this.httpService.post(fullUrl, data, { headers })
+        this.httpService.post(fullUrl, securePayload, { headers })
       );
       return response.data;
     } catch (error) {
@@ -45,30 +46,26 @@ export abstract class BaseProxy {
     }
   }
 
-  // Método genérico para hacer peticiones GET firmadas
   protected async sendGet(endpoint: string) {
+    // LLAMADA CORREGIDA (4 parámetros):
     const { headers } = await this.securityService.getSecurityHeaders(
       this.serviceName,
       this.privateKeyVar,
-      {}
+      this.apiKeyVar, // <-- 3er parámetro
+      {}             // <-- 4to parámetro: Body vacío para GET
     );
+    
     const fullUrl = `${this.baseUrl}${endpoint}`;
 
     try {
       const response = await lastValueFrom(this.httpService.get(fullUrl, { headers }));
       return response.data;
-      // ... dentro de sendGet ...
     } catch (error) {
-      // Este log te dirá si es ECONNREFUSED (puerto cerrado) o ENOTFOUND (URL mal escrita)
       const errorMessage = error.code === 'ECONNREFUSED'
-        ? `CONEXIÓN RECHAZADA: No hay nadie escuchando en ${this.baseUrl}`
+        ? `CONEXIÓN RECHAZADA en ${this.baseUrl}`
         : error.message;
 
       this.logger.error(`Error GET en ${this.serviceName}: ${errorMessage}`);
-
-      // Imprimimos la URL completa para estar 100% seguros
-      this.logger.error(`URL intentada: ${this.baseUrl}${endpoint}`);
-
       throw error.response?.data || new InternalServerErrorException(`Fallo en ${this.serviceName}`);
     }
   }

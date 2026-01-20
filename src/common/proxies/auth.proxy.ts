@@ -1,31 +1,39 @@
-// src/modules/auth/auth.proxy.ts
-import { Injectable, Logger } from '@nestjs/common';
-import { BaseProxy } from './base.proxy';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { BaseMessageProxy } from 'src/common/proxies/base-message.proxy';
+import { InternalSecurityService } from 'src/common/security/internal-security.service';
 
 @Injectable()
-export class AuthProxy extends BaseProxy {
+export class AuthProxy extends BaseMessageProxy {
   protected readonly logger = new Logger(AuthProxy.name);
   protected readonly serviceName = 'auth-service';
-  protected readonly privateKeyVar = 'AUTH_PRIVATE_KEY';
-  protected readonly urlVar = 'AUTH_SERVICE_URL';
+  protected readonly privateKeyVar = 'AUTH_PRIVATE_KEY_BASE64'; // Usada para firmar
+  protected readonly apiKeyVar = 'AUTH_INTERNAL_API_KEY';        // Usada para validación rápida
+  
+  constructor(
+    @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy,
+    securityService: InternalSecurityService,
+  ) {
+    super(authClient, securityService);
+  }
 
   async verifyIdentity(credentialUser: any) {
-    return this.sendPost('/auth/identity', credentialUser);
+    return this.sendRequest('auth.validate-credentials', credentialUser);
   }
 
   async verifyOtp(credentialUser: any) {
-    return this.sendPost('/auth/verify-otp', credentialUser);
+    return this.sendRequest('auth.verify-otp', credentialUser);
   }
 
   async verifyBiometric(credentialUser: any) {
-    return this.sendPost('/auth/biometric', credentialUser);
+    return this.sendRequest('auth.biometric', credentialUser);
   }
 
   async verifyAdmin(credentialUser: any) {
-    return this.sendPost('/auth/admin/login', credentialUser);
+    return this.sendRequest('auth.admin-login', credentialUser);
   }
 
   async autorize() {
-    return this.sendGet('/auth/admin/login');
+    return this.sendRequest('auth.admin-autorizate', {});
   }
 }
