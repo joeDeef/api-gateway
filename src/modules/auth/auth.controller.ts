@@ -1,7 +1,7 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, UseInterceptors, Logger, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthProxy } from '../../common/proxies/auth.proxy';
-import { ValidateIdentityDto, ValidateOtpDto, ValidateBiometricDto } from './dto/main';
+import { ValidateIdentityDto, ValidateOtpDto, ValidateBiometricDto, ValidateAdminDto } from './dto/main';
 import { SecurityHeadersGuard } from 'src/common/guards/security-headers.guard';
 import { DecryptionInterceptor } from 'src/common/interceptors/decryption.interceptor';
 import { AuthOrchestratorService, AuthResponse } from './auth-orchestrator.service';
@@ -43,7 +43,7 @@ export class AuthController {
   async verifyBiometric(
     @Body() data: ValidateBiometricDto,
     @Res({ passthrough: true }) response: Response
-  ): Promise<Partial<AuthResponse>> { 
+  ): Promise<Partial<AuthResponse>> {
     this.logger.log(`Paso 3: Verificando Biometría y configurando sesión segura`);
 
     const authResult = await this.authOrchestrator.completeBiometricVerification(data);
@@ -61,6 +61,12 @@ export class AuthController {
       delete authResult.accessToken;
     }
     return authResult;
+  }
+
+  // Validación Credenciales Administrador
+  @Post('admin/login')
+  async verifyAdmin(@Body() data: ValidateAdminDto) {
+    return await this.authProxy.verifyAdmin(data);
   }
 
   // Validación Credenciales Administrador
