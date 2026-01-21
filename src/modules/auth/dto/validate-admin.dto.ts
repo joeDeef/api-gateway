@@ -1,11 +1,12 @@
-import { IsNotEmpty, Length, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, MinLength, MaxLength } from 'class-validator';
 
 export class ValidateAdminDto {
-    @IsNotEmpty({ message: 'Se necesito un nombre de usuario' })
-    @Length(6, 6)
-    username: string;
+    @IsNotEmpty({ message: 'El correo es obligatorio' })
+    @IsString()
+    email: string;
 
-    @IsNotEmpty({ message: 'Se necesito una contraseña' })
-    @Length(8, 20)
+    @IsNotEmpty({ message: 'Se necesita una contraseña' })
+    @MinLength(8)
+    @MaxLength(30)
     password: string;
 }
