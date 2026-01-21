@@ -17,7 +17,6 @@ export class AuthController {
     private readonly authProxy: AuthProxy,
     private readonly authOrchestrator: AuthOrchestratorService) { }
 
-  // Verificación de Identidad (Cédula, Código Dactilar)
   @Post('identity')
   @HttpCode(HttpStatus.OK)
   async verifyIdentity(@Body() data: ValidateIdentityDto) {
@@ -49,7 +48,6 @@ export class AuthController {
     const authResult = await this.authOrchestrator.completeBiometricVerification(data);
 
     if (authResult.success && authResult.accessToken) {
-      // 1. Ponemos el token en el búnker (Cookie HttpOnly)
       response.cookie('access_token', authResult.accessToken, {
         httpOnly: true,
         secure: true,
@@ -57,13 +55,11 @@ export class AuthController {
         maxAge: 15 * 60 * 1000,
       });
 
-      // 2. ELIMINAMOS el token
       delete authResult.accessToken;
     }
     return authResult;
   }
 
-  // Validación Credenciales Administrador
   @Post('admin/login')
   async verifyAdmin(@Body() data: ValidateAdminDto) {
     return await this.authProxy.verifyAdmin(data);
