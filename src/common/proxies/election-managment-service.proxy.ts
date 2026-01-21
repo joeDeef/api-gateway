@@ -40,6 +40,10 @@ export class ElectionManagmentProxy extends BaseProxy {
     return this.sendPostUnencrypted(`${this.urlElectionMgmtService}/create`, data);
   }
 
+  async findAll() {
+    return this.sendGet(`${this.urlElectionMgmtService}/all`);
+  }
+
   // Método para enviar POST sin cifrado
   protected async sendPostUnencrypted(endpoint: string, data: any) {
     // Solo obtenemos headers básicos de seguridad, sin cifrado

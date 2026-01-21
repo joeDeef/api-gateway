@@ -4,7 +4,7 @@ import { CreateElectionDataDto } from './data-election.dto';
 
 @Controller('election')
 export class ElectionManagmentController {
-  constructor(private readonly electionManagmentProxy: ElectionManagmentProxy) {}
+  constructor(private readonly electionManagmentProxy: ElectionManagmentProxy) { }
 
   @Get('candidates')
   @HttpCode(HttpStatus.OK)
@@ -16,6 +16,12 @@ export class ElectionManagmentController {
   @HttpCode(HttpStatus.OK)
   async createElection(@Body() data: CreateElectionDataDto) {
     return await this.electionManagmentProxy.createElection(data);
+  }
+
+  @Get('all')
+  @HttpCode(HttpStatus.OK)
+  async findAll() {
+    return await this.electionManagmentProxy.findAll();
   }
 
   @Get('test')
