@@ -26,8 +26,8 @@ export class JwtValidatorService {
         algorithms: ['RS256'],
       });
     } catch (error) {
-      this.logger.error(`Fallo en validación de JWT: ${error.message}`);
-      throw new UnauthorizedException('Token inválido o alterado');
+      this.logger.warn(`Validación silenciosa fallida: ${error.message}`);
+      return null
     }
   }
 }

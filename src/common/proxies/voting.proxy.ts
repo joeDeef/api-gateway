@@ -20,7 +20,7 @@ export class VotingProxy extends BaseProxy {
     super(securityService, httpService, configService);
   }
 
-  async setVoterSession(data: { userId: string; expirationTime: number }) {
+  async setVoterSession(data: { userId: string; role: string, expirationTime: number }) {
     return this.sendPost('/voting/setTime', data);
   }
 
