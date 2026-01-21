@@ -8,11 +8,17 @@ export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly jwtValidator: JwtValidatorService,
     @InjectRedis() private readonly redis: Redis,
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    
+
+    // Bypass authentication for voting routes - token is sent in body
+    const url = request.url || request.path;
+    if (url?.startsWith('/voting')) {
+      return true;
+    }
+
     // 1. EXTRAER TOKEN DESDE LA COOKIE 
     const token = request.cookies?.['access_token'];
 
