@@ -51,7 +51,7 @@ export class AuthController {
       response.cookie('access_token', authResult.accessToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'strict',
+        sameSite: 'none',  // Changed from 'strict' for cross-origin requests
         maxAge: 15 * 60 * 1000,
       });
       // Token is also included in response body for frontend SPA compatibility
