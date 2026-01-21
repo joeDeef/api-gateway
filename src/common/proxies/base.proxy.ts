@@ -11,6 +11,7 @@ export abstract class BaseProxy {
   protected abstract readonly privateKeyVar: string;
   protected abstract readonly apiKeyVar: string;
   protected abstract readonly urlVar: string;
+  protected readonly encryptionKeyVar?: string;
 
   constructor(
     protected readonly securityService: InternalSecurityService,
@@ -23,21 +24,23 @@ export abstract class BaseProxy {
   }
 
   protected async sendPost(endpoint: string, data: any) {
-    // LLAMADA CORREGIDA (4 parámetros):
+    // LLAMADA CORREGIDA (5 parámetros con cifrado):
     const { headers, payload: securePayload } = await this.securityService.getSecurityHeaders(
       this.serviceName,
       this.privateKeyVar,
       this.apiKeyVar,
-      data 
+      data,
+      this.encryptionKeyVar
     );
 
     const fullUrl = `${this.baseUrl}${endpoint}`;
     this.logger.log(`Conectando con: ${fullUrl}`);
 
     try {
-      // Importante: Enviamos el securePayload si el servicio espera el cuerpo cifrado
+      // Importante: Enviamos la estructura completa que espera el interceptor
+      const requestBody = { data: securePayload, headers };
       const response = await lastValueFrom(
-        this.httpService.post(fullUrl, securePayload, { headers })
+        this.httpService.post(fullUrl, requestBody, { headers })
       );
       return response.data;
     } catch (error) {
@@ -47,7 +50,7 @@ export abstract class BaseProxy {
   }
 
   protected async sendGet(endpoint: string) {
-    // LLAMADA CORREGIDA (4 parámetros):
+    // Para GET: headers de seguridad van en HTTP headers
     const { headers } = await this.securityService.getSecurityHeaders(
       this.serviceName,
       this.privateKeyVar,

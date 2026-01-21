@@ -8,21 +8,31 @@ import { ConfigModule } from '@nestjs/config';
 import { SecurityHeadersGuard } from 'src/common/guards/security-headers.guard';
 import { InternalSecurityModule } from 'src/common/security/internal-security.module';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RedisModule } from '@nestjs-modules/ioredis';
+import { JwtValidatorService } from 'src/common/security/jwt-validator.service';
 
 @Module({
-  imports: [HttpModule, // Necesario para las peticiones HTTP
-      JwtModule.register({}),
-      ConfigModule,
-      InternalSecurityModule,
+  imports: [
+    HttpModule, // Necesario para las peticiones HTTP
+    JwtModule.register({}),
+    ConfigModule,
+    InternalSecurityModule,
+    RedisModule.forRootAsync({
+      useFactory: () => ({
+        type: 'single',
+        url: process.env.REDIS_URL || 'redis://localhost:6379',
+      }),
+    })
   ],
   controllers: [VotingController],
   providers: [
     VotingProxy,
-    InternalSecurityService, // <--- Agrégalo aquí
-    JwtService, // <--- También es necesario porque el servicio lo usa
+    InternalSecurityService,
+    JwtService,
     SecurityHeadersGuard,
-    JwtAuthGuard
+    JwtAuthGuard,
+    JwtValidatorService
   ],
   exports: [VotingProxy],
 })
-export class VotingnModule { }
+export class VotingModule { }

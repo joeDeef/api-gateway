@@ -1,5 +1,4 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
 import { AuthProxy } from "src/common/proxies/auth.proxy";
 import { VotingProxy } from "src/common/proxies/voting.proxy";
 import { ValidateBiometricDto } from "./dto/validate-biometric.dto";
@@ -10,7 +9,7 @@ import { JwtValidatorService } from "src/common/security/jwt-validator.service";
 export interface AuthResponse {
   success: boolean;
   accessToken?: string;
-  user?: any;
+  expirationTime: number,
   message?: string;
   status?: string;
 }
@@ -38,7 +37,7 @@ export class AuthOrchestratorService {
         const sessionData = {
           userId: payload.sub,
           role: payload.role,
-          expirationTime: payload.exp
+          expirationTime: authResponse.expirationTime
         };
 
         await this.votingProxy.setVoterSession(sessionData);

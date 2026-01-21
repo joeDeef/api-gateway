@@ -1,4 +1,4 @@
-import { Controller, Get, Body, HttpCode, HttpStatus, Post, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Body, HttpCode, HttpStatus, Post, UseGuards, UseInterceptors, Req } from '@nestjs/common';
 import { VotingProxy } from '../../common/proxies/voting.proxy';
 import { DecryptionInterceptor } from 'src/common/interceptors/decryption.interceptor';
 import { DoubleVotingGuard } from 'src/common/guards/double-voting.guard';
@@ -12,15 +12,33 @@ export class VotingController {
   @UseGuards(JwtAuthGuard)
   @Post('cast')
   @UseGuards(DoubleVotingGuard)
-  async castVote(@Body() data: { userId: string; candidateId: string; electionId: string }) {
-    return this.votingProxy.castVote(data);
+  async castVote(
+    @Req() req,
+    @Body() data: { candidateId: string; electionId: string }
+  ) {
+
+    const userIdFromToken = req.user.cedula;
+    const voteData = {
+      ...data,
+      userId: userIdFromToken
+    };
+
+    return this.votingProxy.castVote(voteData);
   }
+
 
   @UseGuards(JwtAuthGuard)
   @Post('confirm')
   @UseGuards(DoubleVotingGuard)
-  async confirmVote(@Body() data: { userId: string; electionId: string }) {
-    return this.votingProxy.confirmVote(data);
+  async confirmVote(
+    @Req() req,
+    @Body() data: { candidateId: string; electionId: string }) {
+    const userIdFromToken = req.user.cedula;
+    const voteData = {
+      ...data,
+      userId: userIdFromToken
+    };
+    return this.votingProxy.confirmVote(voteData);
   }
 
   @Get('test')

@@ -2,9 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ApiGatewayModule } from './api-gateway.module';
 import * as bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
+
+  app.use(cookieParser());
 
   // Aumentar límite para imágenes Base64
   app.use(bodyParser.json({ limit: '10mb' }));

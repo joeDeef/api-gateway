@@ -4,7 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
-import { VotingnModule } from './modules/voting/voting.module';
+import { VotingModule } from './modules/voting/voting.module';
 import { InternalSecurityService } from './common/security/internal-security.service';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { AuthOrchestratorService } from './modules/auth/auth-orchestrator.service';
@@ -21,7 +21,7 @@ import { ElectionManagmentModule } from './modules/election-managment-service/el
     }]),
     RedisModule,
     AuthModule,
-    VotingnModule,
+    VotingModule,
     ElectionManagmentModule,
     ConfigModule.forRoot({
       isGlobal: true,
