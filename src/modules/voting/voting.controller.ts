@@ -1,7 +1,9 @@
 import { Controller, Post, Get, Body, Param, Req, HttpCode, HttpStatus } from '@nestjs/common';
 import { VotingServiceProxy } from './voting-service.proxy';
 import { Request } from 'express';
+import { Public } from '../../common/decorators/public.decorator';
 
+@Public()
 @Controller('voting')
 export class VotingController {
   constructor(private readonly votingProxy: VotingServiceProxy) { }
