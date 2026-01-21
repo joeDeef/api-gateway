@@ -54,8 +54,7 @@ export class AuthController {
         sameSite: 'strict',
         maxAge: 15 * 60 * 1000,
       });
-
-      delete authResult.accessToken;
+      // Token is also included in response body for frontend SPA compatibility
     }
     return authResult;
   }
