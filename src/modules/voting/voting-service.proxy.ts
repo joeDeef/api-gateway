@@ -23,7 +23,7 @@ export class VotingServiceProxy {
             this.logger.log('📥 Proxy: Enviando voto a election-management-service');
 
             const response = await lastValueFrom(
-                this.httpService.post(`${this.baseUrl}/voting/cast`, dto, {
+                this.httpService.post(`${this.baseUrl}/api/voting/cast`, dto, {
                     headers: {
                         'x-api-key': this.configService.get('API_KEY'),
                         'x-internal-token': headers['x-internal-token'] || '',
@@ -50,7 +50,7 @@ export class VotingServiceProxy {
             this.logger.log(`📊 Proxy: Obteniendo resultados de elección ${electionId}`);
 
             const response = await lastValueFrom(
-                this.httpService.get(`${this.baseUrl}/voting/results/${electionId}`, {
+                this.httpService.get(`${this.baseUrl}/api/voting/results/${electionId}`, {
                     headers: {
                         'x-api-key': this.configService.get('API_KEY'),
                         'x-internal-token': headers['x-internal-token'] || '',
@@ -75,7 +75,7 @@ export class VotingServiceProxy {
         try {
             const response = await lastValueFrom(
                 this.httpService.post(
-                    `${this.baseUrl}/voting/check`,
+                    `${this.baseUrl}/api/voting/check`,
                     { token, electionId },
                     {
                         headers: {
