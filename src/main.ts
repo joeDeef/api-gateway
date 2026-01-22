@@ -44,6 +44,6 @@ async function bootstrap() {
   });
 
   await app.listen(port);
-  console.log(`API Gateway listening on port ${port}`);
+  console.log(`API Gateway listening on port ${port} (v2 - Auth Bypass)`);
 }
 bootstrap();
