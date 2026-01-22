@@ -43,7 +43,6 @@ import { ElectionManagmentModule } from './modules/election-managment-service/el
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
     },
-    AuthOrchestratorService,
   ],
   exports: [InternalSecurityService],
   controllers: [],
