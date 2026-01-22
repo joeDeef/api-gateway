@@ -25,7 +25,7 @@ export class VotingServiceProxy {
             const response = await lastValueFrom(
                 this.httpService.post(`${this.baseUrl}/api/voting/cast`, dto, {
                     headers: {
-                        'x-api-key': this.configService.get('API_KEY'),
+                        'x-api-key': this.configService.get('ELECTION_MNGT_INTERNAL_API_KEY'),
                         'x-internal-token': headers['x-internal-token'] || '',
                         'Content-Type': 'application/json',
                     },
@@ -52,7 +52,7 @@ export class VotingServiceProxy {
             const response = await lastValueFrom(
                 this.httpService.get(`${this.baseUrl}/api/voting/results/${electionId}`, {
                     headers: {
-                        'x-api-key': this.configService.get('API_KEY'),
+                        'x-api-key': this.configService.get('ELECTION_MNGT_INTERNAL_API_KEY'),
                         'x-internal-token': headers['x-internal-token'] || '',
                     },
                 }),
@@ -79,7 +79,7 @@ export class VotingServiceProxy {
                     { token, electionId },
                     {
                         headers: {
-                            'x-api-key': this.configService.get('API_KEY'),
+                            'x-api-key': this.configService.get('ELECTION_MNGT_INTERNAL_API_KEY'),
                             'x-internal-token': headers['x-internal-token'] || '',
                             'Content-Type': 'application/json',
                         },
