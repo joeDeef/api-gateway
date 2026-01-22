@@ -22,11 +22,20 @@ export class VotingServiceProxy {
         try {
             this.logger.log('📥 Proxy: Enviando voto a election-management-service');
 
+            // Extraer token de Authorization si no viene en x-internal-token
+            let internalToken = headers['x-internal-token'];
+            if (!internalToken && headers['authorization']) {
+                const parts = headers['authorization'].split(' ');
+                if (parts.length === 2 && parts[0] === 'Bearer') {
+                    internalToken = parts[1];
+                }
+            }
+
             const response = await lastValueFrom(
                 this.httpService.post(`${this.baseUrl}/api/voting/cast`, dto, {
                     headers: {
                         'x-api-key': this.configService.get('ELECTION_MNGT_INTERNAL_API_KEY'),
-                        'x-internal-token': headers['x-internal-token'] || '',
+                        'x-internal-token': internalToken || '',
                         'Content-Type': 'application/json',
                     },
                 }),
@@ -49,11 +58,20 @@ export class VotingServiceProxy {
         try {
             this.logger.log(`📊 Proxy: Obteniendo resultados de elección ${electionId}`);
 
+            // Extraer token
+            let internalToken = headers['x-internal-token'];
+            if (!internalToken && headers['authorization']) {
+                const parts = headers['authorization'].split(' ');
+                if (parts.length === 2 && parts[0] === 'Bearer') {
+                    internalToken = parts[1];
+                }
+            }
+
             const response = await lastValueFrom(
                 this.httpService.get(`${this.baseUrl}/api/voting/results/${electionId}`, {
                     headers: {
                         'x-api-key': this.configService.get('ELECTION_MNGT_INTERNAL_API_KEY'),
-                        'x-internal-token': headers['x-internal-token'] || '',
+                        'x-internal-token': internalToken || '',
                     },
                 }),
             );
@@ -73,6 +91,15 @@ export class VotingServiceProxy {
      */
     async checkVote(token: string, electionId: string, headers: any): Promise<any> {
         try {
+            // Extraer token
+            let internalToken = headers['x-internal-token'];
+            if (!internalToken && headers['authorization']) {
+                const parts = headers['authorization'].split(' ');
+                if (parts.length === 2 && parts[0] === 'Bearer') {
+                    internalToken = parts[1];
+                }
+            }
+
             const response = await lastValueFrom(
                 this.httpService.post(
                     `${this.baseUrl}/api/voting/check`,
@@ -80,7 +107,7 @@ export class VotingServiceProxy {
                     {
                         headers: {
                             'x-api-key': this.configService.get('ELECTION_MNGT_INTERNAL_API_KEY'),
-                            'x-internal-token': headers['x-internal-token'] || '',
+                            'x-internal-token': internalToken || '',
                             'Content-Type': 'application/json',
                         },
                     },
