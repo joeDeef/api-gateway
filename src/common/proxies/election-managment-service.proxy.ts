@@ -22,30 +22,30 @@ export class ElectionManagmentProxy extends BaseProxy {
     super(securityService, httpService, configService);
   }
 
-  async test() {
+  async test(headers: any = {}) {
     this.logger.log('Probando conexión con Election Management Service');
     // Usamos el método GET para obtener datos
-    return this.sendGet(`${this.urlElectionMgmtService}/test`);
+    return this.sendGet(`${this.urlElectionMgmtService}/test`, headers);
   }
 
-  async getCandidatos() {
+  async getCandidatos(headers: any = {}) {
     this.logger.log('Solicitando Candidatos a Election Management Service');
     // Usamos el método GET para obtener datos
-    return this.sendGet(`${this.urlElectionMgmtService}/today`);
+    return this.sendGet(`${this.urlElectionMgmtService}/today`, headers);
   }
 
-  async createElection(data: CreateElectionDataDto) {
+  async createElection(data: CreateElectionDataDto, headers: any = {}) {
     this.logger.log('Creando elección en Election Management Service');
     // Usamos el método POST sin cifrado
-    return this.sendPostUnencrypted(`${this.urlElectionMgmtService}/create`, data);
+    return this.sendPostUnencrypted(`${this.urlElectionMgmtService}/create`, data, headers);
   }
 
-  async findAll() {
-    return this.sendGet(`${this.urlElectionMgmtService}/all`);
+  async findAll(headers: any = {}) {
+    return this.sendGet(`${this.urlElectionMgmtService}/all`, headers);
   }
 
   // Método para enviar POST sin cifrado
-  protected async sendPostUnencrypted(endpoint: string, data: any) {
+  protected async sendPostUnencrypted(endpoint: string, data: any, incomingHeaders: any = {}) {
     // Solo obtenemos headers básicos de seguridad, sin cifrado
     const { headers } = await this.securityService.getSecurityHeaders(
       this.serviceName,
