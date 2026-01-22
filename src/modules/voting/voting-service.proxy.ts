@@ -12,7 +12,7 @@ export class VotingServiceProxy {
         private readonly httpService: HttpService,
         private readonly configService: ConfigService,
     ) {
-        this.baseUrl = this.configService.get<string>('ELECTION_SERVICE_URL') || 'http://localhost:3002';
+        this.baseUrl = this.configService.get<string>('ELECTION_MGMT_URL') || 'http://localhost:3002';
     }
 
     /**
