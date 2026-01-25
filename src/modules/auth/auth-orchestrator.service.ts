@@ -15,23 +15,26 @@ export interface AuthResponse {
 }
 
 // src/modules/auth/auth-orchestrator.service.ts
+// src/modules/auth/auth-orchestrator.service.ts
+
 @Injectable()
 export class AuthOrchestratorService {
-  private readonly logger = new Logger(AuthOrchestratorService.name)
+  private readonly logger = new Logger(AuthOrchestratorService.name);
 
   constructor(
     private readonly authProxy: AuthProxy,
     private readonly jwtValidator: JwtValidatorService,
     private readonly votingProxy: VotingProxy,
-
   ) { }
 
-  async completeBiometricVerification(data: ValidateBiometricDto): Promise<AuthResponse> {
+  async completeBiometricVerification(data: ValidateBiometricDto) {
     const authResponse = await this.authProxy.verifyBiometric(data) as AuthResponse;
+
+    let tokenForCookie: string | null = null;
 
     if (authResponse?.success && authResponse?.accessToken) {
       try {
-        // Usamos el validador centralizado
+        tokenForCookie = authResponse.accessToken;
         const payload = this.jwtValidator.validateToken(authResponse.accessToken);
 
         const sessionData = {
@@ -40,12 +43,23 @@ export class AuthOrchestratorService {
           expirationTime: authResponse.expirationTime
         };
 
+        // Sincronización con el microservicio de votación
         await this.votingProxy.setVoterSession(sessionData);
         this.logger.log(`Sincronización exitosa para usuario ${payload.sub}`);
+
+        // ELIMINAMOS el token del objeto de respuesta original
+        delete authResponse.accessToken;
+
       } catch (err) {
-        this.logger.error(`Fallo crítico en integridad de token o sincronización: ${err.message}`);
+        this.logger.error(`Fallo crítico en sincronización: ${err.message}`);
+        // Opcional: podrías invalidar el success si la sincronización falla
       }
     }
-    return authResponse;
+
+    // Retornamos ambos: la respuesta limpia y el token por separado
+    return {
+      safeResponse: authResponse,
+      token: tokenForCookie
+    };
   }
 }

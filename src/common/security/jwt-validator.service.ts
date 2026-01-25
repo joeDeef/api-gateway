@@ -8,9 +8,9 @@ export class JwtValidatorService {
 
   constructor(private readonly jwtService: JwtService) {
     // Cargamos la llave una sola vez al iniciar el servicio para mayor eficiencia
-    const base64Key = process.env.PUBLIC_KEY_SING_JWT;
+    const base64Key = process.env.JWT_PUBLIC_KEY_BASE64;
     if (!base64Key) {
-      this.logger.error('Falta la variable de entorno PUBLIC_KEY_SING_JWT');
+      this.logger.error('Falta la variable de entorno JWT_PUBLIC_KEY_BASE64');
     }
     this.publicKey = Buffer.from(base64Key || '', 'base64').toString('utf8');
   }

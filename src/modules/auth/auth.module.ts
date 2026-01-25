@@ -6,10 +6,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthOrchestratorService } from './auth-orchestrator.service';
 import { VotingProxy } from 'src/common/proxies/voting.proxy';
-import { InternalSecurityService } from 'src/common/security/internal-security.service';
+import { EnvelopePackerService } from 'src/common/security/envelopePacker.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { HttpModule } from '@nestjs/axios';
 import { InternalSecurityModule } from 'src/common/security/internal-security.module';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { VoterGuard } from 'src/common/guards/voter.guard';
 
 @Module({
   imports: [
@@ -40,11 +42,13 @@ import { InternalSecurityModule } from 'src/common/security/internal-security.mo
     VotingProxy,
     SecurityHeadersGuard,
     AuthOrchestratorService,
-    InternalSecurityService
+    EnvelopePackerService,
+    JwtAuthGuard,
+    VoterGuard,
   ],
   exports: [
     AuthProxy,
-    InternalSecurityService
+    EnvelopePackerService
   ],
 })
 export class AuthModule { }

@@ -1,10 +1,9 @@
 import { IsNotEmpty, Matches } from 'class-validator';
+import { IsEcuadorianId } from 'src/common/decorators/is-ecuadorian-id.decorator';
 
 export class ValidateIdentityDto {
-  @IsNotEmpty({ message: 'La cédula es obligatoria' })
-  @Matches(/^[0-9]{10}$/, { 
-    message: 'La cédula debe contener solo números y tener exactamente 10 dígitos' 
-  })
+  @IsNotEmpty()
+  @IsEcuadorianId({ message: 'Identificación ecuatoriana no válida' })
   cedula: string;
 
   @IsNotEmpty({ message: 'El código dactilar es obligatorio' })

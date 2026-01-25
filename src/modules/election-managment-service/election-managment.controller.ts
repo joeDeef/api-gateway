@@ -1,7 +1,8 @@
 import { Controller, Get, Body, HttpCode, HttpStatus, Post, UseGuards, UseInterceptors, Req } from '@nestjs/common';
 import { ElectionManagmentProxy } from 'src/common/proxies/election-managment-service.proxy';
 import { CreateElectionDataDto } from './data-election.dto';
-import type { Request } from 'express';
+import { AdminGuard } from 'src/common/guards/admin.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('election')
 export class ElectionManagmentController {
@@ -9,25 +10,21 @@ export class ElectionManagmentController {
 
   @Get('candidates')
   @HttpCode(HttpStatus.OK)
-  async getCandidatos(@Req() req: Request) {
-    return await this.electionManagmentProxy.getCandidatos(req.headers);
+  async getCandidatos() {
+    return await this.electionManagmentProxy.getCandidatos();
   }
 
   @Post('create')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @HttpCode(HttpStatus.OK)
-  async createElection(@Body() data: CreateElectionDataDto, @Req() req: Request) {
-    return await this.electionManagmentProxy.createElection(data, req.headers);
+  async createElection(@Body() data: CreateElectionDataDto) {
+    return await this.electionManagmentProxy.createElection(data);
   }
 
   @Get('all')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @HttpCode(HttpStatus.OK)
-  async findAll(@Req() req: Request) {
-    return await this.electionManagmentProxy.findAll(req.headers);
-  }
-
-  @Get('test')
-  @HttpCode(HttpStatus.OK)
-  async test(@Req() req: Request) {
-    return await this.electionManagmentProxy.test(req.headers);
+  async findAll() {
+    return await this.electionManagmentProxy.findAll();
   }
 }

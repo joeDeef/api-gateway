@@ -2,11 +2,11 @@ import { IsNotEmpty, Length, IsString, Matches } from 'class-validator';
 
 export class ValidateBiometricDto {
 
-  @IsNotEmpty({ message: 'La cédula es obligatoria' })
-  @Matches(/^[0-9]{10}$/, {
-    message: 'La cédula debe contener solo números y tener exactamente 10 dígitos'
+  @IsNotEmpty({ message: 'El ID es obligatorio' })
+  @Matches(/^[0-9]$/, {
+    message: 'El id debe contener solo números'
   })
-  cedula: string;
+  id: string;
 
   @IsNotEmpty({ message: 'Se necesito una imagen' })
   image: string;

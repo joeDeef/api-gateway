@@ -1,77 +1,43 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { JwtValidatorService } from '../security/jwt-validator.service';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import Redis from 'ioredis';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(
-    private readonly jwtValidator: JwtValidatorService,
-    @InjectRedis() private readonly redis: Redis,
-    private readonly reflector: Reflector,
-  ) { }
+  private readonly logger = new Logger(JwtAuthGuard.name);
+  private readonly publicKey: string;
+
+  constructor(private readonly jwtService: JwtService) {
+    // Leemos la llave pública desde las variables de entorno
+    const base64Key = process.env.JWT_PUBLIC_KEY_BASE64;
+    if (!base64Key) {
+      this.logger.error('JWT_PUBLIC_KEY_BASE64 no configurada en el Gateway');
+      throw new Error('Error de configuración de seguridad');
+    }
+    this.publicKey = Buffer.from(base64Key, 'base64').toString('utf8');
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // Check if route is marked as @Public
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-    if (isPublic) {
-      return true;
-    }
-
     const request = context.switchToHttp().getRequest();
-
-    // Bypass authentication for voting routes - token is sent in body
-    const url = request.url || request.path;
-    if (url?.startsWith('/voting')) {
-      return true;
-    }
-
-    // 1. EXTRAER TOKEN DESDE LA COOKIE 
     const token = request.cookies?.['access_token'];
 
     if (!token) {
-      throw new UnauthorizedException('No se encontró una sesión activa (Cookie faltante)');
+      throw new UnauthorizedException('Sesión no encontrada');
     }
 
     try {
-      // BARRERA 1: Integridad y Expiración (Stateless)
-      const payload = this.jwtValidator.validateToken(token);
+      // VALIDACIÓN CRIPTOGRÁFICA DE LA FIRMA
+      // Si el token fue manipulado, verify() lanzará una excepción inmediatamente
+      const payload = this.jwtService.verify(token, {
+        publicKey: this.publicKey,
+        algorithms: ['RS256'],
+      });
 
-      // BARRERA 2: Existencia en Redis (Stateful)
-      const sessionKey = `session:${payload.sub}`;
-      const sessionData = await this.redis.get(sessionKey);
-
-      if (!sessionData) {
-        throw new UnauthorizedException('La sesión de votación ha expirado o ya ha sido utilizada');
-      }
-
-      const session = JSON.parse(sessionData);
-
-      // BARRERA 3: Validación de Huella Digital (Fingerprinting)
-      // Comparamos el navegador actual contra el que guardamos en el login
-      const currentAgent = request.headers['user-agent'];
-      if (session.userAgent && session.userAgent !== currentAgent) {
-        this.redis.del(sessionKey); // Borramos la sesión por sospecha de robo de cookie
-        throw new UnauthorizedException('Intento de acceso desde un dispositivo no autorizado');
-      }
-
-      // 4. Inyección de Identidad
-      request.user = {
-        cedula: payload.sub,
-        role: payload.role,
-        voterToken: session.voterToken,
-        sessionId: sessionKey
-      };
-
+      // Inyectamos el payload validado en la request para los siguientes pasos
+      request.user = payload;
       return true;
     } catch (error) {
-      if (error instanceof UnauthorizedException) throw error;
-      throw new UnauthorizedException('Sesión inválida o alterada');
+      this.logger.warn(`Intento de acceso con token inválido: ${error.message}`);
+      throw new UnauthorizedException('Token inválido, manipulado o expirado');
     }
   }
 }

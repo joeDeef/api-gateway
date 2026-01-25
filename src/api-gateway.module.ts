@@ -1,51 +1,61 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { HttpModule } from '@nestjs/axios';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+
+// Módulos Internos
 import { AuthModule } from './modules/auth/auth.module';
 import { VotingModule } from './modules/voting/voting.module';
-import { InternalSecurityService } from './common/security/internal-security.service';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { AuthOrchestratorService } from './modules/auth/auth-orchestrator.service';
-import { HttpModule } from '@nestjs/axios';
-import { RedisModule } from './common/redis/redis.module';
 import { ElectionManagmentModule } from './modules/election-managment-service/election-managment.module';
+import { RedisModule } from './common/redis/redis.module';
+
+// Servicios y Common
+import { EnvelopePackerService } from './common/security/envelopePacker.service';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { VoterGuard } from './common/guards/voter.guard';
 
 @Module({
   imports: [
-    // Configuración de límites (Rate Limiting)
-    ThrottlerModule.forRoot([{
-      ttl: 60000, // Tiempo de observación (1 minuto)
-      limit: 20,   // Máximo de peticiones permitidas por minuto por IP
-    }]),
+    // 1. Configuración Global de la App
+    ConfigModule.forRoot({ isGlobal: true }),
+    JwtModule.register({
+      global: true,
+    }),
+    HttpModule.register({ global: true }),
     RedisModule,
+
+    // 2. Seguridad: Rate Limiting (Throttling)
+    // 20 peticiones por minuto
+    ThrottlerModule.forRoot([{
+      ttl: 60000, 
+      limit: 20,  
+    }]),
+
+    // 3. Microservicios / Orquestación
     AuthModule,
     VotingModule,
     ElectionManagmentModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    JwtModule.register({}),
-    HttpModule.register({
-      global: true, // <--- Esto lo hace disponible en TODA la app
-    }),
   ],
   providers: [
-    InternalSecurityService,
-    // Registrar el Guard Globalmente -> asegura que todas las rutas del Gateway tengan limitación de peticiones
+    EnvelopePackerService,
+    
+    // Guard Global: Se ejecuta antes que cualquier controlador
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
-    // REGISTRO GLOBAL DEL INTERCEPTOR
+
+    // Interceptor Global: Registra tiempos y logs de cada petición
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
     },
+    JwtAuthGuard,
+    VoterGuard,
   ],
-  exports: [InternalSecurityService],
-  controllers: [],
+  exports: [EnvelopePackerService],
 })
-export class ApiGatewayModule {
-}
+export class ApiGatewayModule {}

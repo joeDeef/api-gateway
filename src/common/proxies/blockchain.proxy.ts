@@ -5,14 +5,13 @@ import { ConfigService } from '@nestjs/config';
 import { EnvelopePackerService } from '../security/envelopePacker.service';
 
 @Injectable()
-export class DashboardElectionProxy extends BaseProxy {
-  protected readonly logger = new Logger(DashboardElectionProxy.name);
-  protected readonly targetService = 'dashboard-service';
-  protected readonly privateKeyVar = 'DASHBOARD_PRIVATE_KEY';
-  protected readonly urlVar = 'DASHBOARD_SERVICE_URL';
-  protected readonly apiKeyVar = 'DASH_ELECT_INTERNAL_API_KEY';
-  protected readonly publicKeyVar = 'DASHBOARD_ENCRYPTION_KEY';
-
+export class BlockchainProxy extends BaseProxy {
+  protected readonly logger = new Logger(BlockchainProxy.name);
+  protected readonly targetService = 'blockchain-service';
+  protected readonly privateKeyVar = 'BLOCKCHAIN_PRIVATE_KEY';
+  protected readonly apiKeyVar = 'BLOCKCHAIN_INTERNAL_API_KEY';
+  protected readonly publicKeyVar = 'BLOCKCHAIN_PUBLIC_KEY';
+  protected readonly urlVar = 'BLOCKCHAIN_SERVICE_URL';
 
   constructor(
     protected readonly securityService: EnvelopePackerService,
@@ -22,8 +21,10 @@ export class DashboardElectionProxy extends BaseProxy {
     super(securityService, httpService, configService);
   }
 
-  async getResults() {
+  async getResultados(electionID : string) {
     this.logger.log('--- [GATEWAY] Solicitando Resultados Reales ---');
-    return this.sendGet('/results/summary');
+    return this.sendGet(`/voting/all/${electionID}`);
+    //return this.sendGet(`/voting/all/ELEC-2024`);
+
   }
 }
