@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { VotingController } from './voting.controller';
+import { VotingService } from './voting.service';
 import { VotingProxy } from 'src/common/proxies/voting.proxy';
 import { ElectionManagmentProxy } from 'src/common/proxies/election-managment-service.proxy';
 import { BlockchainProxy } from 'src/common/proxies/blockchain.proxy';
@@ -9,9 +10,10 @@ import { BlockchainProxy } from 'src/common/proxies/blockchain.proxy';
   imports: [HttpModule],
   controllers: [VotingController],
   providers: [
+    VotingService,
     VotingProxy,
     ElectionManagmentProxy,
-    BlockchainProxy
+    BlockchainProxy,
   ],
 })
 export class VotingModule { }

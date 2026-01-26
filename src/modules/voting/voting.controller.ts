@@ -1,9 +1,9 @@
 import { Controller, Post, Get, Body, Param, Req, HttpCode, HttpStatus, UseGuards, Logger, OnModuleInit } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { VoterGuard } from 'src/common/guards/voter.guard';
-import { BlockchainProxy } from 'src/common/proxies/blockchain.proxy';
 import { ElectionManagmentProxy } from 'src/common/proxies/election-managment-service.proxy';
 import { VotingProxy } from 'src/common/proxies/voting.proxy';
+import { VotingService } from './voting.service';
 
 /**
  * Controlador para operaciones de votación
@@ -16,7 +16,7 @@ export class VotingController implements OnModuleInit {
   constructor(
     private readonly votingProxy: VotingProxy,
     private readonly electionMgntProxy: ElectionManagmentProxy,
-    private readonly blockchainService: BlockchainProxy
+    private readonly votingService: VotingService
   ) { }
 
 
@@ -90,6 +90,24 @@ export class VotingController implements OnModuleInit {
   @HttpCode(HttpStatus.OK)
   async getResultados() {
     this.logger.log(`Obteniendo resultados para la elección: ${this.electionId}`);
-    return this.blockchainService.getResultados(this.electionId)
+    
+    return this.votingService.getResultadosCompletos(this.electionId);
+  }
+
+  /**
+   * Valida si la sesión del votante sigue activa y válida
+   * @param req - Request object con información del usuario autenticado
+   * @returns Estado de la sesión del votante
+   */
+  @UseGuards(JwtAuthGuard, VoterGuard)
+  @Get('validate-session')
+  @HttpCode(HttpStatus.OK)
+  async validateSession(@Req() req: any) {
+    this.logger.log(`Validando sesión para usuario: ${req.user.sub}`);
+    
+    return {
+      valid: true,
+      message: 'Sesión válida'
+    };
   }
 }

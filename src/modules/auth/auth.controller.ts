@@ -136,15 +136,17 @@ export class AuthController {
     };
   }
 
-  /**
-   * @method autorizateAction
-   * @description Endpoint para autorizar acciones de administrador, protegido por cabeceras de seguridad.
-   * @returns {Promise<any>} El resultado de la autorización.
-   */
-  @Post('admin/autorizate')
-  @UseGuards(SecurityHeadersGuard) // Valida cabeceras de seguridad específicas para acciones de admin.
-  async autorizateAction() {
-    this.logger.log('Autorizando acción de administrador.');
-    return await this.authProxy.autorize();
+  // En el controlador del backend (AuthController)
+  @Post('logout')  // Para votantes
+  @Post('admin/logout')  // Para admin
+  async logout(@Res() response: Response) {
+
+    response.clearCookie('access_token', {
+      httpOnly: true,
+      secure: true,
+      path: '/'
+    });
+
+    return response.json({ success: true, message: 'Sesión cerrada' });
   }
 }
