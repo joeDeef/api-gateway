@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MinLength, MaxLength, IsEmail } from 'class-validator';
+import { IsNotEmpty, IsString, IsEmail, IsHash, Length } from 'class-validator';
 
 export class ValidateAdminDto {
     @IsNotEmpty({ message: 'El correo es obligatorio' })
@@ -7,7 +7,8 @@ export class ValidateAdminDto {
     email: string;
 
     @IsNotEmpty({ message: 'Se necesita una contraseña' })
-    @MinLength(12, { message: 'La contraseña debe tener al menos 12 caracteres' })
-    @MaxLength(64)
+    @IsString()
+    @IsHash('sha256', { message: 'La contraseña no tiene el formato de seguridad esperado' })
+    @Length(64, 64, { message: 'El hash de seguridad debe tener exactamente 64 caracteres' })
     password: string;
 }
