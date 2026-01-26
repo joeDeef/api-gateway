@@ -27,10 +27,8 @@ export class VotingController implements OnModuleInit {
       // Si el proxy retorna directamente el string del UUID
       const response = await this.electionMgntProxy.findElectionIdToday();
 
-      this.logger.debug(response)
-
-      if (response && typeof response === 'string') {
-        this.electionId = response;
+      if (response) {
+        this.electionId = response.electionId;
         this.logger.log(`ID de elección cargado: ${this.electionId}`);
       } else {
         this.logger.warn('La respuesta no es un UUID válido o no hay elecciones hoy.');
